@@ -146,54 +146,48 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-100 p-6 font-sans">
-      <h1 className="text-4xl font-bold mb-6 text-indigo-700 text-center">SEO Analyzer Web App 🚀</h1>
+      <h1 className="text-4xl font-bold mb-6 text-indigo-700 text-center">
+        SEO Analyzer Web App 🚀
+      </h1>
 
-      <textarea
-        rows={8}
-        className="w-full border border-gray-300 p-4 rounded-lg text-base resize-none shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 text-gray-900 bg-white"
-        placeholder="Paste your blog, tweet, or text here..."
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      />
+      {/* Side-by-side layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Input Box */}
+        <div>
+          <h3 className="text-xl font-semibold mb-2 text-black">Input Text</h3>
+          <textarea
+            className="w-full h-[300px] border border-gray-300 p-4 rounded-lg text-base resize-none shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 text-black bg-white"
+            placeholder="Paste your blog, tweet, or text here..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
 
+          <button
+            onClick={handleAnalyze}
+            disabled={loading}
+            className="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-lg text-base font-medium hover:bg-indigo-700 disabled:opacity-50"
+          >
+            {loading ? "Analyzing..." : "Analyze SEO"}
+          </button>
+          {error && <p className="text-red-600 mt-2">{error}</p>}
+        </div>
 
-      <button
-        onClick={handleAnalyze}
-        disabled={loading}
-        className="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-lg text-base font-medium hover:bg-indigo-700 disabled:opacity-50"
-      >
-        {loading ? "Analyzing..." : "Analyze SEO"}
-      </button>
+        {/* Output Preview Box */}
+        <div>
+          <h3 className="text-xl font-semibold mb-2 text-black">Text Preview</h3>
+          <div className="w-full h-[300px] whitespace-pre-wrap p-4 border border-gray-300 rounded-md bg-white text-gray-900 shadow-inner">
+            {text}
+          </div>
+        </div>
+      </div>
 
-      {error && <p className="text-red-600 mt-4">{error}</p>}
 
       {results && (
-        <div className="mt-8 bg-white shadow-md rounded-lg p-6 border border-gray-200">
-          <h2 className="text-2xl font-semibold text-indigo-700 mb-4">SEO Analysis Results</h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2 text-gray-800 text-base">
-            <p><strong>Readability Ease Score:</strong> {results.readabilityScore?.ease}</p>
-            <p><strong>Grade Level:</strong> {results.readabilityScore?.grade}</p>
-            <p><strong>Total Words:</strong> {results.extraMetrics?.totalWords}</p>
-            <p><strong>Avg. Sentence Length:</strong> {results.extraMetrics?.avgSentenceLength} words</p>
-            <p><strong>Complex Words %:</strong> {results.extraMetrics?.complexWordsPercent}%</p>
-            <p><strong>Stopwords %:</strong> {results.extraMetrics?.stopwordsPercent}%</p>
-          </div>
-
-          {results.suggestions?.length > 0 && (
-            <>
-              <p className="mt-6 text-lg font-semibold text-gray-800">Suggestions:</p>
-              <ul className="list-disc list-inside text-gray-700 mt-1">
-                {results.suggestions.map((s, idx) => (
-                  <li key={idx}>{s}</li>
-                ))}
-              </ul>
-            </>
-          )}
-
+        <>
+          {/* Recommended Keywords above metrics */}
           {results.keywords?.length > 0 && (
-            <>
-              <p className="mt-6 text-lg font-semibold text-gray-800">Recommended Keywords:</p>
+            <div className="mt-8">
+              <p className="text-lg font-semibold text-gray-800">Recommended Keywords:</p>
               <div className="flex flex-wrap gap-3 mt-2">
                 {results.keywords.map((kw, idx) => (
                   <div
@@ -210,18 +204,38 @@ function App() {
                   </div>
                 ))}
               </div>
-            </>
+            </div>
           )}
-        </div>
+
+          {/* Metrics Card Below */}
+          <div className="mt-8 bg-white shadow-md rounded-lg p-6 border border-gray-200">
+            <h2 className="text-2xl font-semibold text-indigo-700 mb-4">SEO Analysis Results</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2 text-gray-800 text-base">
+              <p><strong>Readability Ease Score:</strong> {results.readabilityScore?.ease}</p>
+              <p><strong>Grade Level:</strong> {results.readabilityScore?.grade}</p>
+              <p><strong>Total Words:</strong> {results.extraMetrics?.totalWords}</p>
+              <p><strong>Avg. Sentence Length:</strong> {results.extraMetrics?.avgSentenceLength} words</p>
+              <p><strong>Complex Words %:</strong> {results.extraMetrics?.complexWordsPercent}%</p>
+              <p><strong>Stopwords %:</strong> {results.extraMetrics?.stopwordsPercent}%</p>
+              <p><strong>Unique Words:</strong> {results.extraMetrics?.uniqueWordsCount}</p>
+            </div>
+
+            {results.suggestions?.length > 0 && (
+              <>
+                <p className="mt-6 text-lg font-semibold text-gray-800">Suggestions:</p>
+                <ul className="list-disc list-inside text-gray-700 mt-1">
+                  {results.suggestions.map((s, idx) => (
+                    <li key={idx}>{s}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+        </>
       )}
 
-      <div className="mt-8">
-        <h3 className="text-xl font-semibold mb-2">Text Preview</h3>
-        <div className="whitespace-pre-wrap p-4 border border-gray-300 rounded-md bg-white text-gray-900 min-h-[100px] shadow-inner">
-          {text}
-        </div>
-      </div>
     </div>
+
   );
 }
 

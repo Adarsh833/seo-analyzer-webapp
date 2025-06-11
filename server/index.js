@@ -83,6 +83,76 @@ function countSyllables(word) {
   return syllableMatches ? syllableMatches.length : 1;
 }
 
+// Extract distinct, relevant keywords from entities/words
+function extractKeywords(data) {
+  const stopwords = new Set([
+    "the", "and", "but", "with", "this", "that", "for", "you", "is", "are"
+  ]);
+
+  if (!data) return [];
+
+  const { entities = [], words = [] } = data;
+
+  if (entities.length > 0) {
+    return entities
+      .map((e) => e.matchedText.trim())
+      .filter((kw, i, arr) =>
+        kw.length > 2 &&
+        !stopwords.has(kw.toLowerCase()) &&
+        arr.indexOf(kw) === i
+      );
+  }
+
+  if (words.length > 0) {
+    return Array.from(new Set(
+      words
+        .map((w) => w.lemma.toLowerCase())
+        .filter((kw) => kw.length > 2 && !stopwords.has(kw))
+    ));
+  }
+
+  return [];
+}
+
+// Insert a keyword into the text smartly
+function insertKeyword(text, keyword) {
+  if (!keyword || typeof text !== "string") return text;
+
+  const lowerText = text.toLowerCase();
+  const lowerKeyword = keyword.toLowerCase();
+
+  // Avoid inserting duplicate keyword (can be removed if always want to insert)
+  if (lowerText.includes(lowerKeyword)) {
+    return text; // Optional: or force insert anyway
+  }
+
+  // Split into sentences
+  const sentences = text.match(/[^.!?]+[.!?]/g) || [text];
+
+  // Pick the longest sentence to insert into
+  let indexToInsert = 0;
+  let maxLength = 0;
+  sentences.forEach((s, i) => {
+    if (s.length > maxLength) {
+      maxLength = s.length;
+      indexToInsert = i;
+    }
+  });
+
+  const sentence = sentences[indexToInsert].trim();
+
+  // Insert keyword just before the period
+  const updatedSentence = sentence.endsWith(".")
+    ? sentence.slice(0, -1) + " " + keyword + "."
+    : sentence + " " + keyword;
+
+  sentences[indexToInsert] = updatedSentence;
+
+  // Join sentences back together
+  return sentences.join(" ").replace(/\s{2,}/g, " ");
+}
+
+
 function analyzeTextMetrics(text, keywords) {
   const words = text.match(/\b\w+\b/g) || [];
   const totalWords = words.length;
@@ -195,5 +265,21 @@ app.post("/analyze", async (req, res) => {
     res.status(500).json({ error: "Failed to analyze text." });
   }
 });
+
+app.post("/insert-keyword", (req, res) => {
+  const { text, keyword } = req.body;
+
+  if (!text || !keyword) {
+    return res.status(400).json({ error: "Text and keyword are required." });
+  }
+
+  try {
+    const updatedText = insertKeyword(text, keyword);
+    res.json({ updatedText });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to insert keyword." });
+  }
+});
+
 
 app.listen(5000, () => console.log("Server is running on port 5000"));

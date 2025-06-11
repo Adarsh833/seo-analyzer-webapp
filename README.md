@@ -28,15 +28,15 @@ This tool provides insights like keyword suggestions, readability score, and oth
 - Node.js + Express
 - [TextRazor API](https://www.textrazor.com/) (or Twinword API) for SEO analysis
 
-##  Setup Frontend
--cd client
--npm install
--npm run dev
+### Setup Frontend
+- cd client
+- npm install
+- npm run dev
 
-## Setup Backend
--cd client
--npm install
--npm run dev
+### Setup Backend
+- cd client
+- npm install
+- npm run dev
 
 ## API_KEY
--TEXTRAZOR_API_KEY=your_api_key_here
+- TEXTRAZOR_API_KEY=your_api_key_here

@@ -16,64 +16,90 @@ export default function App() {
   };
 
   const handleInsertKeyword = (keyword) => {
-    // Check if keyword already exists in text
     if (text.toLowerCase().includes(keyword.toLowerCase())) return;
-
-    // Insert keyword at the end (you can make this smarter later)
+  
     setText(prev => prev.trim() + ". " + keyword);
+  
+    // Remove the inserted keyword from results.keywords
+    setResults(prev => ({
+      ...prev,
+      keywords: prev.keywords.filter(k => k !== keyword)
+    }));
   };
-
+  
 
   return (
-    <div className="min-h-screen p-6 bg-gray-100">
-      <h1 className="text-3xl font-bold mb-4 text-blue-600">SEO Analyzer Web App 🚀</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-100 p-6">
+      <h1 className="text-4xl font-bold mb-6 text-blue-700">SEO Analyzer Web App 🚀</h1>
 
       <textarea
         placeholder="Enter your blog, tweet or caption..."
-        className="w-full h-40 p-3 border rounded-md mb-4"
+        className="w-full h-40 p-4 border-2 border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
 
-      <p className="mt-4 text-sm text-gray-600">Updated Text Preview:</p>
-      <p className="bg-white p-3 rounded border text-gray-800">{text}</p>
-
+      <div className="mt-6">
+        <p className="text-sm text-gray-600 mb-1">Text Preview:</p>
+        <div className="bg-white p-4 rounded-lg border text-gray-800 shadow-inner whitespace-pre-wrap max-h-52 overflow-y-auto">
+          {text}
+        </div>
+      </div>
 
       <button
-        className="mb-6 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        className="mt-6 px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded shadow hover:shadow-lg transition"
         onClick={handleAnalyze}
       >
-        Analyze
+        Analyze Text
       </button>
 
       {results && (
-        <div className="bg-white shadow-md rounded-md p-4">
-          <h2 className="text-xl font-semibold mb-2">SEO Results</h2>
-          <p><strong>Readability Score:</strong> {results.readabilityScore}</p>
-          <p className="mt-2 font-medium">Suggestions:</p>
-          <ul className="list-disc list-inside">
-            {results.suggestions.map((s, idx) => <li key={idx}>{s}</li>)}
-          </ul>
-          <p className="mt-2 font-medium">Recommended Keywords:</p>
-          <div className="flex flex-wrap gap-2">
-            {results.keywords.map((kw, idx) => (
-              <div key={idx} className="flex items-center gap-2 bg-green-100 text-green-800 px-2 py-1 rounded">
-                <span>{kw}</span>
-                <button
-                  onClick={() => handleInsertKeyword(kw)}
-                  className="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
-                >
-                  Insert
-                </button>
-              </div>
-            ))}
+        <div className="mt-8 bg-white shadow-lg rounded-lg p-6 border border-gray-200">
+          <h2 className="text-2xl font-semibold text-blue-700 mb-4">SEO Results</h2>
 
-
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2 text-gray-800 text-base">
+            <p><strong>Readability Ease Score:</strong> {results.readabilityScore?.ease}</p>
+            <p><strong>Grade Level:</strong> {results.readabilityScore?.grade}</p>
+            <p><strong>Total Words:</strong> {results.extraMetrics?.totalWords}</p>
+            <p><strong>Avg. Sentence Length:</strong> {results.extraMetrics?.avgSentenceLength} words</p>
+            <p><strong>Complex Words %:</strong> {results.extraMetrics?.complexWordsPercent}%</p>
+            <p><strong>Stopwords %:</strong> {results.extraMetrics?.stopwordsPercent}%</p>
           </div>
-        </div>
 
+          {results.suggestions?.length > 0 && (
+            <>
+              <p className="mt-6 text-lg font-semibold text-gray-800">Suggestions:</p>
+              <ul className="list-disc list-inside text-gray-700 mt-1">
+                {results.suggestions.map((s, idx) => (
+                  <li key={idx}>{s}</li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {results.keywords?.length > 0 && (
+            <>
+              <p className="mt-6 text-lg font-semibold text-gray-800">Recommended Keywords:</p>
+              <div className="flex flex-wrap gap-3 mt-2">
+                {results.keywords.map((kw, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 bg-green-100 text-green-800 px-3 py-1 rounded-full shadow-sm"
+                  >
+                    <span className="font-medium">{kw}</span>
+                    <button
+                      onClick={() => handleInsertKeyword(kw)}
+                      className="text-xs bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded-full"
+                    >
+                      Insert
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       )}
     </div>
-
   );
 }

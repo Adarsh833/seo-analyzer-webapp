@@ -39,4 +39,4 @@ This tool provides insights like keyword suggestions, readability score, and oth
 - npm run dev
 
 ## API_KEY
-- TEXTRAZOR_API_KEY=your_api_key_here
+- readmeTEXTRAZOR_API_KEY=your_api_key_here

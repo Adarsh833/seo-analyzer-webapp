@@ -2,15 +2,17 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 function App() {
-  const [text, setText] = useState("");
-  const [results, setResults] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [highlightedText, setHighlightedText] = useState("");
-  const [history, setHistory] = useState([]);
+  // State variables
+  const [text, setText] = useState(""); 
+  const [results, setResults] = useState(null); 
+  const [loading, setLoading] = useState(false); 
+  const [error, setError] = useState(""); 
+  const [highlightedText, setHighlightedText] = useState(""); 
+  const [history, setHistory] = useState([]); // For undo functionality
 
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "http://localhost:5000"; // Backend API endpoint
 
+  // Load saved draft from localStorage on initial load
   useEffect(() => {
     const saved = localStorage.getItem("seoDraft");
     if (saved) {
@@ -19,16 +21,19 @@ function App() {
     }
   }, []);
 
+  // Save the current draft to localStorage whenever the text changes
   useEffect(() => {
     localStorage.setItem("seoDraft", text);
   }, [text]);
 
+  // Function to call the backend API and fetch SEO analysis
   const handleAnalyze = async () => {
     setError("");
     if (text.trim() === "") {
       setError("Please enter some text.");
       return;
     }
+
     setLoading(true);
     try {
       const response = await axios.post(`${BACKEND_URL}/analyze`, { text });
@@ -40,20 +45,29 @@ function App() {
     }
   };
 
+  // Function to insert a recommended keyword into the text
   const handleInsertKeyword = (keyword) => {
+    // Prevent duplicate insertions
     if (text.toLowerCase().includes(keyword.toLowerCase())) return;
+
+    // Save current state for undo
     setHistory([...history, text]);
+
+    // Add keyword and highlight it
     const newText = text.trim() + ". " + keyword;
     setText(newText);
     highlightInserted(newText, keyword);
+
+    // Remove keyword from the list
     setResults((prev) => ({
       ...prev,
       keywords: prev.keywords.filter((k) => k !== keyword),
     }));
   };
 
+  // Highlight inserted keyword using a yellow background
   const highlightInserted = (text, keyword) => {
-    const safeKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const safeKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // escape special chars
     const highlighted = text.replace(
       new RegExp(`(${safeKeyword})`, "gi"),
       '<span class="bg-yellow-200 font-semibold">$1</span>'
@@ -61,6 +75,7 @@ function App() {
     setHighlightedText(highlighted);
   };
 
+  // Undo last keyword insertion
   const handleUndo = () => {
     if (history.length === 0) return;
     const prev = history[history.length - 1];
@@ -71,13 +86,14 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-100 p-6 font-sans">
+      {/* App Header */}
       <h1 className="text-4xl font-bold mb-6 text-indigo-700 text-center">
         SEO Analyzer Web App
       </h1>
 
-      {/* Side-by-side layout */}
+      {/* Text Input and Preview Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Input */}
+        {/* Input Text Area */}
         <div className="flex flex-col h-[350px]">
           <div className="text-xl font-semibold mb-2 text-gray-800">Input Text</div>
           <textarea
@@ -86,6 +102,8 @@ function App() {
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
+
+          {/* Action Buttons */}
           <div className="mt-4 flex gap-2">
             <button
               onClick={handleAnalyze}
@@ -101,10 +119,12 @@ function App() {
               Undo
             </button>
           </div>
+
+          {/* Error Message */}
           {error && <p className="text-red-600 mt-2">{error}</p>}
         </div>
 
-        {/* Preview */}
+        {/* Text Preview with Highlights */}
         <div className="flex flex-col h-[350px]">
           <div className="text-xl font-semibold mb-2 text-gray-800">Text Preview</div>
           <div
@@ -114,7 +134,7 @@ function App() {
         </div>
       </div>
 
-      {/* Recommended Keywords */}
+      {/* Recommended Keywords Section */}
       {results?.keywords?.length > 0 && (
         <div className="mt-8 bg-white shadow-md rounded-lg p-6 border border-gray-200">
           <h2 className="text-xl font-semibold mb-4 text-green-800">Recommended Keywords</h2>
@@ -137,7 +157,7 @@ function App() {
         </div>
       )}
 
-      {/* SEO Analysis Results */}
+      {/* Final SEO Analysis Results Section */}
       {results && (
         <div className="mt-8 bg-white shadow-md rounded-lg p-6 border border-gray-200">
           <h2 className="text-2xl font-semibold text-indigo-700 mb-4">SEO Analysis Results</h2>
@@ -151,15 +171,17 @@ function App() {
             <p><strong>Unique Words:</strong> {results.extraMetrics?.uniqueWordsCount}</p>
           </div>
 
+          {/* Suggestions Section */}
           {results.suggestions?.length > 0 && (
             <>
               <p className="mt-6 text-lg font-semibold text-gray-800">Suggestions:</p>
 
-              {/* Check if first suggestion is an intro line */}
+              {/* If first suggestion is a general tip (like SEO topics), show it separately */}
               {results.suggestions[0].startsWith("Try focusing on") && (
                 <p className="text-gray-700 mt-1">{results.suggestions[0]}</p>
               )}
 
+              {/* Display other suggestions in bullet list */}
               <ul className="list-disc list-inside text-gray-700 mt-1">
                 {results.suggestions.slice(1).map((s, idx) => (
                   <li key={idx}>{s}</li>
@@ -167,7 +189,6 @@ function App() {
               </ul>
             </>
           )}
-
         </div>
       )}
     </div>
@@ -175,4 +196,3 @@ function App() {
 }
 
 export default App;
-

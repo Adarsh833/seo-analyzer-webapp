@@ -125,7 +125,7 @@ function App() {
         </div>
 
         {/* Text Preview with Highlights */}
-        <div className="flex flex-col h-[350px]">
+        <div className="flex flex-col h-[290px]">
           <div className="text-xl font-semibold mb-2 text-gray-800">Text Preview</div>
           <div
             className="flex-1 w-full whitespace-pre-wrap p-4 border border-gray-300 rounded-md bg-white text-gray-900 shadow-inner overflow-auto"

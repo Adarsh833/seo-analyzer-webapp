@@ -14,7 +14,7 @@ app.get("/", (req, res) => {
 
 function countSyllables(word) {
   word = word.toLowerCase();
-  if(word.length <= 3) return 1;
+  if (word.length <= 3) return 1;
   // Simple heuristic to count vowel groups as syllables
   const syllableMatches = word.match(/[aeiouy]{1,2}/g);
   return syllableMatches ? syllableMatches.length : 1;
@@ -202,6 +202,36 @@ app.post("/analyze", async (req, res) => {
     res.status(500).json({ error: "Failed to analyze text." });
   }
 });
+
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+app.post("/rewrite", async (req, res) => {
+  const { text } = req.body;
+
+  if (!text || text.trim().length === 0) {
+    return res.status(400).json({ error: "Text is required for rewriting." });
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    const prompt = `Rewrite the following content to improve SEO, readability, and keyword integration. Only return the rewritten paragraph. Do NOT include any explanation or analysis and that '*' symbols and average sentence length should be less than 15. It should improve the readability score and SEO.
+
+    Text:
+    ${text}`;
+    
+    const result = await model.generateContent(prompt);
+    const rewrittenText = result.response.text();
+
+    res.json({ rewrittenText });
+  } catch (error) {
+    console.error("Error rewriting with Gemini:", error.message);
+    res.status(500).json({ error: "Failed to rewrite the content with Gemini." });
+  }
+});
+
 
 app.post("/insert-keyword", (req, res) => {
   const { text, keyword } = req.body;

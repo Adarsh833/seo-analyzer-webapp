@@ -3,11 +3,11 @@ import axios from "axios";
 
 function App() {
   // State variables
-  const [text, setText] = useState(""); 
-  const [results, setResults] = useState(null); 
-  const [loading, setLoading] = useState(false); 
-  const [error, setError] = useState(""); 
-  const [highlightedText, setHighlightedText] = useState(""); 
+  const [text, setText] = useState("");
+  const [results, setResults] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [highlightedText, setHighlightedText] = useState("");
   const [history, setHistory] = useState([]); // For undo functionality
 
   const BACKEND_URL = "http://localhost:5000"; // Backend API endpoint
@@ -84,6 +84,28 @@ function App() {
     setHistory(history.slice(0, -1));
   };
 
+  const handleRewrite = async () => {
+    setError("");
+    if (text.trim() === "") {
+      setError("Please enter some text to rewrite.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await axios.post("http://localhost:5000/rewrite", { text });
+      const newText = response.data.rewrittenText;
+      setHistory([...history, text]);
+      setText(newText);
+      highlightInserted(newText, "");
+    } catch (err) {
+      setError("Error rewriting the content.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-100 p-6 font-sans">
       {/* App Header */}
@@ -118,6 +140,15 @@ function App() {
             >
               Undo
             </button>
+
+            <button
+              onClick={handleRewrite}
+              disabled={loading}
+              className="bg-green-600 text-white px-6 py-2 rounded-lg text-base font-medium hover:bg-green-700 disabled:opacity-50"
+            >
+              {loading ? "Rewriting..." : "Rewrite with AI"}
+            </button>
+
           </div>
 
           {/* Error Message */}

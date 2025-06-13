@@ -203,6 +203,8 @@ app.post("/analyze", async (req, res) => {
   }
 });
 
+
+// Used Google Gemini to enhance the text and improve the score.
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);

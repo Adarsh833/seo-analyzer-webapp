@@ -186,7 +186,7 @@ function App() {
                   onClick={() => handleInsertKeyword(kw)}
                   className="text-xs bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded-full"
                 >
-                  Insert
+                  +
                 </button>
               </div>
             ))}
